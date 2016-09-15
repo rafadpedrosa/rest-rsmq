@@ -1,0 +1,14 @@
+{
+  "data": [
+      {
+        "vt": 0,
+        "delay": 0,
+        "maxsize": 2048,
+        "totalrecv": 7,
+        "totalsent": 1,
+        "created": 1473878480,
+        "modified": 1473878480,
+        "msgs": 1,
+        "hiddenmsgs": 0
+      }]
+    }

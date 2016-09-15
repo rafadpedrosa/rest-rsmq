@@ -12,19 +12,20 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- */
-
+*/
 (function() {
-  var RSMQ, app, express, rsmq;
+  var RSMQ, app, express, rsmq, http, response2,body;
 
   RSMQ = require("rsmq");
+  http = require("http");
 
   rsmq = new RSMQ();
 
   express = require('express');
 
   app = express();
-
+  app.use(express.static('rest-app'));
+  app.use(express.static('bower_components'));
   app.use(function(req, res, next) {
     res.header('Content-Type', "application/json");
     res.removeHeader("X-Powered-By");
@@ -35,6 +36,74 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
     app.use(express.logger("dev"));
     app.use(express.bodyParser());
   });
+
+
+  // ##############################################
+  function findAttributes(chunk){
+    // console.log("findAttributes"+chunk);
+    var contador = 0;
+    JSON.parse(""+chunk).queues.forEach(function(entry) {
+      var attrOpt = {
+        host: '127.0.0.1',
+        port: 8101,
+        path: '/queues/'+entry
+      };
+      // console.log("entry:"+entry);
+      // console.log("entry:"+JSON.stringify(attrOpt));
+      http.get(attrOpt, function(res2) {
+        res2.on("data", function(chunk2) {
+          // console.log(""+chunk2);
+          var objJson = JSON.parse(chunk2);
+          objJson.qname = entry;
+          if (body == "") {
+            body += JSON.stringify(objJson) ;
+          }else{
+            body += ","+JSON.stringify(objJson);
+          }
+          contador++;
+          if (JSON.parse(""+chunk).queues.length == contador) {
+            response2.emit('bodyComplete');
+          }
+        });
+      });
+    });
+  }
+
+  function callbackRequest(res){
+    // console.log("Got response: " + res.statusCode);
+
+    res.on("data", findAttributes);
+
+    // console.log("acabou");
+  }
+
+
+  app.get('/listAllQueues', function(req, res){
+    body = "";
+    var listQueuesOpt = {
+      host: '127.0.0.1',
+      port: 8101,
+      path: '/queues/'
+    };
+
+    response2 = http.get(listQueuesOpt, callbackRequest);
+
+    response2.addListener('bodyComplete', function(){
+      res.send("{\"data\":["+body+"]}");
+    });
+
+    response2.on('error', function(e) {
+      console.log("Got error: " + e.message);
+    });
+
+    response2.on('finish', function(e) {
+      console.log("TERMINOU 2! \n {data:["+body+"]}");
+    });
+
+    console.log("entro aqui");
+  });
+
+  // ##############################################
 
   app.get('/queues', function(req, res) {
     return rsmq.listQueues(function(err, resp) {
