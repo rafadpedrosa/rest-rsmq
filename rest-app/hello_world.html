@@ -1,193 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta http-equiv="Content-type" content="text/html; charset=utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <script src="//code.jquery.com/jquery-1.12.3.js" ></script>
+<meta http-equiv="Content-type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="//code.jquery.com/jquery-1.12.3.js"></script>
 
 
-  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
-  <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css">
-  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.12/css/dataTables.material.min.css">
-  <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.1.0/material.min.css">
-  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js">
+<link rel="stylesheet"
+	href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<link rel="stylesheet"
+	href="https://code.getmdl.io/1.2.1/material.indigo-pink.min.css">
+<link rel="stylesheet" type="text/css"
+	href="https://cdn.datatables.net/1.10.12/css/dataTables.material.min.css">
+<link rel="stylesheet" type="text/css"
+	href="//cdnjs.cloudflare.com/ajax/libs/material-design-lite/1.1.0/material.min.css">
+<script type="text/javascript" language="javascript"
+	src="https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js">
   </script>
-  <script type="text/javascript" language="javascript" src="https://cdn.datatables.net/1.10.12/js/dataTables.material.min.js">
+<script type="text/javascript" language="javascript"
+	src="https://cdn.datatables.net/1.10.12/js/dataTables.material.min.js">
   </script>
-  <script defer src="https://code.getmdl.io/1.2.1/material.min.js"></script>
-
-  <!--getmdl-select-->
-  <!-- <script src="../node_modules/getmdl-select/getmdl-select.min.js"></script>
-  <link rel="stylesheet" href="../node_modules/getmdl-select/getmdl-select.min.css"> -->
-
-  <script>
-
-  var d = new Date();
-
-  // calling the function
-  formatDate(d,4);
-
-
-  function formatDate(dateObj,format)
-  {
-    var monthNames = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
-    var curr_date = dateObj.getDate();
-    var curr_month = dateObj.getMonth();
-    curr_month = curr_month + 1;
-    var curr_year = dateObj.getFullYear();
-    var curr_min = dateObj.getMinutes();
-    var curr_hr= dateObj.getHours();
-    var curr_sc= dateObj.getSeconds();
-    if(curr_month.toString().length == 1)
-    curr_month = '0' + curr_month;
-    if(curr_date.toString().length == 1)
-    curr_date = '0' + curr_date;
-    if(curr_hr.toString().length == 1)
-    curr_hr = '0' + curr_hr;
-    if(curr_min.toString().length == 1)
-    curr_min = '0' + curr_min;
-
-    if(format ==1)//dd-mm-yyyy
-    {
-      return curr_date + "-"+curr_month+ "-"+curr_year;
-    }
-    else if(format ==2)//yyyy-mm-dd
-    {
-      return curr_year + "-"+curr_month+ "-"+curr_date;
-    }
-    else if(format ==3)//dd/mm/yyyy
-    {
-      return curr_date + "/"+curr_month+ "/"+curr_year;
-    }
-    else if(format ==4)// MM/dd/yyyy HH:mm:ss
-    {
-      return curr_month+"/"+curr_date +"/"+curr_year+ " "+curr_hr+":"+curr_min+":"+curr_sc;
-    }
-  }
-
-  $(document).ready(function() {
-    var table = $('#example').DataTable( {
-      "processing": true,
-      ajax: '/listAllQueues',
-      // ajax: '/data.json',
-      columns: [
-        { data: 'qname' },
-        { data: 'vt' },
-        { data: 'delay' },
-        { data: 'maxsize' },
-        { data: 'totalrecv' },
-        { data: 'totalsent' },
-        { data: 'created' },
-        { data: 'modified' },
-        { data: 'msgs' },
-        { data: 'hiddenmsgs' }
-      ],
-
-
-      "columnDefs": [
-        {
-          // The `data` parameter refers to the data for the cell (defined by the
-          // `data` option, which defaults to the column being worked with, in
-          // this case `data: 0`.
-          "render": function ( data, type, row ) {
-            console.log(data);
-            // var unixtime = 1473912895 - 10800;
-            var newDate = new Date();
-            newDate.setTime(data * 1000);
-            return formatDate(newDate,4);
-          },
-          "targets": [6,7]
-        }
-      ],
-
-      // columnDefs: [
-      //   {
-      //     targets: [ 0, 1, 2 ],
-      //     className: 'mdl-data-table__cell--non-numeric'
-      //   }
-      // ],
-      "oLanguage": {
-        "sSearch": "_INPUT_",
-        "sLengthMenu": '<select>'+
-        '<option value="10">10 rows</option>'+
-        '<option value="20">20 rows</option>'+
-        '<option value="30">30 rows</option>'+
-        '<option value="40">40 rows</option>'+
-        '<option value="50">50 rows</option>'+
-        '<option value="-1">All</option>'+
-        '</select>'
-      },
-      "fnPreDrawCallback": function(oSettings, json) {
-        console.log( 'DataTables has finished its initialisation.' );
-        // $(".dataTables_filter label").html("");
-        $(".dataTables_filter label input").addClass("mdl-textfield__input");
-        $('.dataTables_length label select').addClass("mdl-textfield__input");
-      }
-    } );
-
-    setInterval( function () {
-      console.log("reload begin");
-      table.ajax.reload( null, false );
-      console.log("reload done");
-    }, 15000 );
-
-  } );
-
-
-  </script>
+<script defer src="https://code.getmdl.io/1.2.1/material.min.js"></script>
+<script defer src="js/loadQueues.js"></script>
 
 </head>
 
-<body class="mdl-demo mdl-color--grey-100 mdl-color-text--grey-700 mdl-base">
-  <div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
-    <div class="mdl-tabs__tab-bar">
-      <a href="#starks-panel" class="mdl-tabs__tab is-active">Starks</a>
-      <a href="#lannisters-panel" class="mdl-tabs__tab">Lannisters</a>
-      <a href="#targaryens-panel" class="mdl-tabs__tab">Targaryens</a>
-    </div>
+<body
+	class="mdl-demo mdl-color--grey-100 mdl-color-text--grey-700 mdl-base">
+	<div class="mdl-tabs mdl-js-tabs mdl-js-ripple-effect">
+		<div class="mdl-tabs__tab-bar">
+			<a href="#starks-panel" class="mdl-tabs__tab is-active">Starks</a> <a
+				href="#lannisters-panel" class="mdl-tabs__tab">Lannisters</a> <a
+				href="#targaryens-panel" class="mdl-tabs__tab">Targaryens</a>
+		</div>
 
-    <div class="mdl-tabs__panel is-active" id="starks-panel">
+		<div class="mdl-tabs__panel is-active" id="starks-panel">
 
-      <!-- <form action="#">
-      <div class="mdl-textfield mdl-js-textfield">
-      <input class="mdl-textfield__input" type="text" id="sample1">
-      <label class="mdl-textfield__label" for="sample1">Text...</label>
-    </div>
-  </form> -->
-
-  <table id="example" class="mdl-data-table" cellspacing="0" width="100%">
-    <thead>
-      <tr>
-        <th>qname</th>
-        <th>vt</th>
-        <th>delay</th>
-        <th>maxsize</th>
-        <th>totalrecv</th>
-        <th>totalsent</th>
-        <th>created</th>
-        <th>modified</th>
-        <th>msgs</th>
-        <th>hiddenmsgs</th>
-      </tr>
-    </thead>
-    <tbody>
-    </tbody>
-  </table>
+			<table id="example" class="mdl-data-table" cellspacing="0"
+				width="100%">
+				<thead>
+					<tr>
+						<th>qname</th>
+						<th>vt</th>
+						<th>delay</th>
+						<th>maxsize</th>
+						<th>totalrecv</th>
+						<th>totalsent</th>
+						<th>created</th>
+						<th>modified</th>
+						<th>msgs</th>
+						<th>hiddenmsgs</th>
+					</tr>
+				</thead>
+				<tbody>
+				</tbody>
+			</table>
 </body>
 </div>
 <div class="mdl-tabs__panel" id="lannisters-panel">
-  <ul>
-    <li>Tywin</li>
-    <li>Cersei</li>
-    <li>Jamie</li>
-    <li>Tyrion</li>
-  </ul>
+	<ul>
+		<li>Tywin</li>
+		<li>Cersei</li>
+		<li>Jamie</li>
+		<li>Tyrion</li>
+	</ul>
 </div>
 <div class="mdl-tabs__panel" id="targaryens-panel">
-  <ul>
-    <li>Viserys</li>
-    <li>Daenerys</li>
-  </ul>
+	<ul>
+		<li>Viserys</li>
+		<li>Daenerys</li>
+	</ul>
 </div>
 </div>
 </html>
